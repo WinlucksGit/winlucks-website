@@ -1,0 +1,26 @@
+name: Copy images from the old website
+on:
+  workflow_dispatch:
+permissions:
+  contents: write
+jobs:
+  copy:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Download images from winlucks.com
+        run: |
+          mkdir -p img
+          for f in 1 111 15 21 22 24 25 47 5 53 57 58 59 6 60 8 cele coin log1; do
+            curl -fsSL --retry 3 -o "img/$f.png" "https://winlucks.com/img/$f.png" && echo "ok $f" || echo "MISSING $f"
+          done
+          for f in visa Maestro amrcan; do
+            curl -fsSL -o "img/$f.png" "https://winlucks.com/img/$f.png" || true
+          done
+      - name: Save to the repository
+        run: |
+          git config user.name "Winlucks"
+          git config user.email "info@winlucks.com"
+          git add img
+          git commit -m "Add images from the old website" || echo "Nothing new"
+          git push
